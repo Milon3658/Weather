@@ -6,35 +6,60 @@ import 'package:initial_app/Core/Utilities/exportutilities.dart';
 import 'Core/Utilities/AppColors.dart';
 import 'Core/Utilities/AppConstrains.dart';
 import 'Core/Utilities/exportutilities.dart';
-
-//import 'package:location/location.dart';
 import 'package:initial_app/Presentation/locationPage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+
+
+const apiKey = '694fe13fb643e90033e1d5f8461d11ce';
+
+
+
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key key}) : super(key: key);
-
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
+
+
+
   double latitude;
   double longitude;
-  DateTime timeandDate = DateTime.now();
+  double weatherData;
+  double userLocation;
+  double temperature;
+  double locaionWind;
+
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getLocaton();
+    getLocationData();
   }
-
-  void getLocaton() async {
+  void getLocationData() async {
     Location location = Location();
     await location.getcurrentLocation();
-    print(location.latitude);
-    print(location.longitude);
+    latitude = location.latitude;
+    longitude = location.longitude;
+    getData();
+
   }
+
+  void getData()async {
+    print(longitude.toString());
+    print(latitude.toString());
+    print(weatherData.toString());
+    print(userLocation.toString());
+    print(temperature.toString());
+    print(locaionWind.toString());
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +98,12 @@ class _MainPageState extends State<MainPage> {
                   transitionDuration: const Duration(milliseconds: 800),
                   transitionCurve: Curves.easeInOut,
                   physics: const BouncingScrollPhysics(),
-                  //axisAlignment: isPortrait ? 0.0 : -1.0,
+//axisAlignment: isPortrait ? 0.0 : -1.0,
                   openAxisAlignment: 0.0,
                   width: 320,
                   debounceDelay: const Duration(milliseconds: 500),
                   onQueryChanged: (query) {
-                    // Call your model, bloc, controller here.
+// Call your model, bloc, controller here.
                   },
                   builder:
                       (BuildContext context, Animation<double> transition) {},
@@ -88,7 +113,7 @@ class _MainPageState extends State<MainPage> {
               Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  "City",
+                  '$userLocation',
                   style: TextStyle(
                     fontSize: 50,
                     color: AppColours.FONTCOLOR,
@@ -174,31 +199,6 @@ class _MainPageState extends State<MainPage> {
                     ],
                   ),
                   AppConstrains.width40,
-                  Column(
-                    children: [
-                      Text(
-                        "Rain",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "2",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "%",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
                   AppConstrains.width40,
                   Column(
                     children: [
