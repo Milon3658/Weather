@@ -1,20 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:initial_app/weatherdata.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:get/get.dart';
 import 'package:initial_app/Core/Utilities/exportutilities.dart';
 import 'Core/Utilities/AppColors.dart';
 import 'Core/Utilities/AppConstrains.dart';
-import 'Core/Utilities/exportutilities.dart';
 import 'package:initial_app/Presentation/locationPage.dart';
-import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
-
-
-const apiKey = '694fe13fb643e90033e1d5f8461d11ce';
-
-
+const apiKey = '2354e98370030ff501aec418861005f8';
 
 
 class MainPage extends StatefulWidget {
@@ -23,17 +19,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-
-
-
   double latitude;
   double longitude;
+
   double weatherData;
   double userLocation;
   double temperature;
   double locaionWind;
-
-
 
   @override
   void initState() {
@@ -41,28 +33,34 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     getLocationData();
   }
+
+
   void getLocationData() async {
     Location location = Location();
     await location.getcurrentLocation();
     latitude = location.latitude;
     longitude = location.longitude;
-    getData();
+    //print(latitude);
+    //print(longitude);
+
+    NetworkHelper networkHelper =  NetworkHelper('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
+
+    var weatherData = await networkHelper.getData;
+
 
   }
 
-  void getData()async {
-    print(longitude.toString());
-    print(latitude.toString());
-    print(weatherData.toString());
-    print(userLocation.toString());
-    print(temperature.toString());
-    print(locaionWind.toString());
+
+
+  void getData(){
+
   }
-
-
 
   @override
   Widget build(BuildContext context) {
+
+    getData();
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
@@ -235,3 +233,9 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
+
+//
+// var userLocation = decodeData['name'];
+// var temp= decodeData['main']['temp'];
+// print(temp);
+// print(userLocation);
