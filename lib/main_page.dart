@@ -12,7 +12,6 @@ import 'package:http/http.dart' as http;
 
 const apiKey = '2354e98370030ff501aec418861005f8';
 
-
 class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
@@ -22,7 +21,7 @@ class _MainPageState extends State<MainPage> {
   double latitude;
   double longitude;
 
-  double weatherData;
+  var weatherData;
   double userLocation;
   double temperature;
   double locaionWind;
@@ -31,11 +30,12 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getLocationData();
+    if (weatherData == null) {
+      getLocationData();
+    }
   }
 
-
-  void getLocationData() async {
+  getLocationData() async {
     Location location = Location();
     await location.getcurrentLocation();
     latitude = location.latitude;
@@ -43,193 +43,195 @@ class _MainPageState extends State<MainPage> {
     //print(latitude);
     //print(longitude);
 
-    NetworkHelper networkHelper =  NetworkHelper('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
+    NetworkHelper networkHelper = NetworkHelper(
+        'https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey');
 
-    var weatherData = await networkHelper.getData;
+    weatherData = await networkHelper.getData();
 
-
-  }
-
-
-
-  void getData(){
-
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-
-    getData();
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: AssetImage(
-              "asset/images/mainImage.jpg",
-            ),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          child: Column(
-            children: [
-              Container(
-                height: 30,
-              ),
-              Container(
-                height: 150,
-                width: Get.width,
-                child: FloatingSearchBar(
-                  //backgroundColor: Colors.transparent,
-                  //accentColor: Colors.transparent,
-                  //backdropColor: Colors.transparent,
-                  //shadowColor: Colors.transparent,
-
-                  hint: 'Find your Location',
-                  hintStyle: TextStyle(
-                    color: Colors.black,
+      body: weatherData == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Container(
+        height: Get.height,
+            constraints: BoxConstraints.expand(),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage(
+                    "asset/images/mainImage.jpg",
                   ),
-                  scrollPadding: const EdgeInsets.only(top: 16),
-                  transitionDuration: const Duration(milliseconds: 800),
-                  transitionCurve: Curves.easeInOut,
-                  physics: const BouncingScrollPhysics(),
-//axisAlignment: isPortrait ? 0.0 : -1.0,
-                  openAxisAlignment: 0.0,
-                  width: 320,
-                  debounceDelay: const Duration(milliseconds: 500),
-                  onQueryChanged: (query) {
-// Call your model, bloc, controller here.
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: RefreshIndicator(
+                  onRefresh: ()async{
+                    await getLocationData();
                   },
-                  builder:
-                      (BuildContext context, Animation<double> transition) {},
-                ),
-              ),
-              AppConstrains.height20,
-              Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  '$userLocation',
-                  style: TextStyle(
-                    fontSize: 50,
-                    color: AppColours.FONTCOLOR,
-                  ),
-                ),
-              ),
-              AppConstrains.height10,
-              Row(
-                children: [
-                  Text(
-                    "Time and Date",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColours.FONTCOLOR,
-                    ),
-                  ),
-                ],
-              ),
-              Spacer(),
-              Row(
-                children: [
-                  Column(
+                  child: ListView(
                     children: [
-                      Text(
-                        "28 °C",
-                        style: TextStyle(
-                          fontSize: 50,
-                          color: AppColours.FONTCOLOR,
+                      Container(
+                        height: 30,
+                      ),
+                      Container(
+                        height: 150,
+                        width: Get.width,
+                        child: FloatingSearchBar(
+                          //backgroundColor: Colors.transparent,
+                          //accentColor: Colors.transparent,
+                          //backdropColor: Colors.transparent,
+                          //shadowColor: Colors.transparent,
+
+                          hint: 'Find your Location',
+                          hintStyle: TextStyle(
+                            color: Colors.black,
+                          ),
+                          scrollPadding: const EdgeInsets.only(top: 16),
+                          transitionDuration: const Duration(milliseconds: 800),
+                          transitionCurve: Curves.easeInOut,
+                          physics: const BouncingScrollPhysics(),
+//axisAlignment: isPortrait ? 0.0 : -1.0,
+                          openAxisAlignment: 0.0,
+                          width: 320,
+                          debounceDelay: const Duration(milliseconds: 500),
+                          onQueryChanged: (query) {
+// Call your model, bloc, controller here.
+                          },
+                          builder: (BuildContext context,
+                              Animation<double> transition) {},
                         ),
                       ),
+                      AppConstrains.height20,
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          '${weatherData['name']}',
+                          style: TextStyle(
+                            fontSize: 50,
+                            color: AppColours.FONTCOLOR,
+                          ),
+                        ),
+                      ),
+                      AppConstrains.height10,
                       Row(
                         children: [
-                          Icon(Icons.auto_awesome,
-                              color: AppColours.FONTCOLOR, size: 20),
-                          AppConstrains.width15,
                           Text(
-                            "Night",
+                            "Time and Date",
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               color: AppColours.FONTCOLOR,
                             ),
                           ),
                         ],
                       ),
+                      Row(
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                "${(weatherData['main']['temp'] - 273).toStringAsFixed(0)}°C",
+                                style: TextStyle(
+                                  fontSize: 50,
+                                  color: AppColours.FONTCOLOR,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Icon(Icons.auto_awesome,
+                                      color: AppColours.FONTCOLOR, size: 20),
+                                  AppConstrains.width15,
+                                  Text(
+                                    "Night",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: AppColours.FONTCOLOR,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      AppConstrains.height40,
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 50),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white),
+                        ),
+                      ),
+                      AppConstrains.height40,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                "Wind",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                "${weatherData['wind']['speed']}",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                "km/h",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                          AppConstrains.width40,
+                          AppConstrains.width40,
+                          Column(
+                            children: [
+                              Text(
+                                "Humidity",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                "${weatherData['main']['humidity']}",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                "%",
+                                style: TextStyle(
+                                  color: AppColours.FONTCOLOR,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      AppConstrains.height40,
                     ],
                   ),
-                ],
-              ),
-              AppConstrains.height40,
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 50),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white),
                 ),
               ),
-              AppConstrains.height40,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        "Wind",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "10",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "km/h",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  AppConstrains.width40,
-                  AppConstrains.width40,
-                  Column(
-                    children: [
-                      Text(
-                        "Humidity",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "10",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        "%",
-                        style: TextStyle(
-                          color: AppColours.FONTCOLOR,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              AppConstrains.height40,
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
